@@ -22,13 +22,13 @@ public interface BeanFactory {
      */
     void registerBeanDefinition(BeanDefinition beanDefinition);
 
-    /**
-     * 对单例 Bean 的注册
-     *
-     * @param beanName Bean名称
-     * @param obj      beanName 对应的 Bean 的信息
-     */
-    void registerBean(String beanName, Object obj);
+//    /**
+//     * 对单例 Bean 的注册
+//     *
+//     * @param beanName Bean名称
+//     * @param obj      beanName 对应的 Bean 的信息
+//     */
+//    void registerBean(String beanName, Object obj);
 
 
     /**

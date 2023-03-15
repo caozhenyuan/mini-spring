@@ -55,7 +55,6 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
      * @param beanName Bean名称
      * @param obj      beanName 对应的 Bean 的信息
      */
-    @Override
     public void registerBean(String beanName, Object obj) {
         this.registerSingleton(beanName, obj);
     }
