@@ -3,6 +3,7 @@ package com.minis.beans;
 import com.minis.core.Resource;
 import org.dom4j.Element;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,18 +29,6 @@ public class XmlBeanDefinitionReader {
             String beanClassName = element.attributeValue("class");
             BeanDefinition beanDefinition = new BeanDefinition(beanId, beanClassName);
 
-            //handle properties
-            List<Element> propertyElements = element.elements("properties");
-            PropertyValues pvs = new PropertyValues();
-            for (Element propertyElement : propertyElements) {
-                String pType = propertyElement.attributeValue("type");
-                String pName = propertyElement.attributeValue("name");
-                String pValue = propertyElement.attributeValue("value");
-                pvs.addPropertyValue(pType, pName, pValue);
-            }
-            beanDefinition.setPropertyValues(pvs);
-            //end of handle properties
-
             //handle constructor
             List<Element> constructorElements = element.elements("constructor-arg");
             ArgumentValues avs = new ArgumentValues();
@@ -51,6 +40,33 @@ public class XmlBeanDefinitionReader {
             }
             beanDefinition.setConstructorArgumentValues(avs);
             //end of handle constructor
+
+            //handle properties
+            List<Element> propertyElements = element.elements("property");
+            PropertyValues pvs = new PropertyValues();
+            List<String> refs = new ArrayList<>();
+            for (Element propertyElement : propertyElements) {
+                String pType = propertyElement.attributeValue("type");
+                String pName = propertyElement.attributeValue("name");
+                String pValue = propertyElement.attributeValue("value");
+
+                String pRef = propertyElement.attributeValue("ref");
+                String pV = "";
+                boolean isRef = false;
+                if (null != pValue && !"".equals(pValue)) {
+                    pV = pValue;
+                } else {
+                    isRef = true;
+                    //此处ref的值在代码里复制给value
+                    pV = pRef;
+                    refs.add(pRef);
+                }
+                pvs.addPropertyValue(pType, pName, pV, isRef);
+            }
+            beanDefinition.setPropertyValues(pvs);
+            String[] refArrays = refs.toArray(new String[0]);
+            beanDefinition.setDependsOn(refArrays);
+            //end of handle properties
 
             this.simpleBeanFactory.registerBeanDefinition(beanDefinition);
         }

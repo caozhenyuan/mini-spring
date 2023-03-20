@@ -8,7 +8,7 @@ import java.util.List;
  * @date 2023/03/15
  **/
 
-public class PropertyValues{
+public class PropertyValues {
     private final List<PropertyValue> propertyValueList;
 
     public PropertyValues() {
@@ -27,8 +27,8 @@ public class PropertyValues{
         this.propertyValueList.add(pv);
     }
 
-    public void addPropertyValue(String propertyType, String propertyName, Object propertyValue) {
-        addPropertyValue(new PropertyValue(propertyType, propertyName, propertyValue));
+    public void addPropertyValue(String propertyType, String propertyName, Object propertyValue, Boolean isRef) {
+        addPropertyValue(new PropertyValue(propertyType, propertyName, propertyValue, isRef));
     }
 
     public void removePropertyValue(PropertyValue pv) {

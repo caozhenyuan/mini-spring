@@ -18,12 +18,19 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
     /**
      * context负责整合容器的启动过程，读外部配置，解析Bean定义，创建BeanFactor
      */
-    ClassPathXmlApplicationContext(String fileName) {
+    public ClassPathXmlApplicationContext(String fileName) {
+        this(fileName, true);
+    }
+
+    public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
         Resource resource = new ClassPathXmlResource(fileName);
         SimpleBeanFactory bf = new SimpleBeanFactory();
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
         reader.loadBeanDefinitions(resource);
         this.beanFactory = bf;
+        if (!isRefresh) {
+            this.beanFactory.refresh();
+        }
     }
 
     /**
@@ -53,7 +60,7 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
      * @param beanName Bean名称
      * @param obj      beanName 对应的 Bean 的信息
      */
-    @Override
+//    @Override
     public void registerBean(String beanName, Object obj) {
         this.beanFactory.registerBean(beanName, obj);
     }
