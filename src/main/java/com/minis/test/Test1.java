@@ -10,7 +10,7 @@ import com.minis.context.ClassPathXmlApplicationContext;
 public class Test1 {
 
     public static void main(String[] args) {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
         AService aservice;
         try {
             aservice = (AService) context.getBean("aService");

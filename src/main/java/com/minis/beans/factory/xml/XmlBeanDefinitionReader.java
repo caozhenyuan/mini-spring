@@ -1,5 +1,11 @@
-package com.minis.beans;
+package com.minis.beans.factory.xml;
 
+import com.minis.beans.PropertyValues;
+import com.minis.beans.SimpleBeanFactory;
+import com.minis.beans.factory.config.AutowireCapableBeanFactory;
+import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.beans.factory.config.ConstructorArgumentValues;
+import com.minis.beans.factory.support.AbstractBeanFactory;
 import com.minis.core.Resource;
 import org.dom4j.Element;
 
@@ -13,10 +19,10 @@ import java.util.List;
  **/
 public class XmlBeanDefinitionReader {
 
-    private SimpleBeanFactory simpleBeanFactory;
+    private AutowireCapableBeanFactory beanFactory;
 
-    public XmlBeanDefinitionReader(SimpleBeanFactory simpleBeanFactory) {
-        this.simpleBeanFactory = simpleBeanFactory;
+    public XmlBeanDefinitionReader(AutowireCapableBeanFactory autowireCapableBeanFactory) {
+        this.beanFactory = autowireCapableBeanFactory;
     }
 
     /**
@@ -31,7 +37,7 @@ public class XmlBeanDefinitionReader {
 
             //handle constructor
             List<Element> constructorElements = element.elements("constructor-arg");
-            ArgumentValues avs = new ArgumentValues();
+            ConstructorArgumentValues avs = new ConstructorArgumentValues();
             for (Element constructorElement : constructorElements) {
                 String cType = constructorElement.attributeValue("type");
                 String cName = constructorElement.attributeValue("name");
@@ -68,7 +74,7 @@ public class XmlBeanDefinitionReader {
             beanDefinition.setDependsOn(refArrays);
             //end of handle properties
 
-            this.simpleBeanFactory.registerBeanDefinition(beanDefinition);
+            this.beanFactory.registerBeanDefinition(beanDefinition);
         }
     }
 }
