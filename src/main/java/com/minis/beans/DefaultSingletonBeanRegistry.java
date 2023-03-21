@@ -110,7 +110,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
         if (dependentBeans.isEmpty()) {
             return new String[0];
         }
-        return (String[]) dependentBeans.toArray();
+        return dependentBeans.toArray(new String[0]);
     }
 
     /**
@@ -124,6 +124,6 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
         if (dependenciesForBean.isEmpty()) {
             return new String[0];
         }
-        return (String[]) dependenciesForBean.toArray();
+        return dependenciesForBean.toArray(new String[0]);
     }
 }
