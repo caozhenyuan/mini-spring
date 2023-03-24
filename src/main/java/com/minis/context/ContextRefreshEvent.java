@@ -1,18 +1,15 @@
 package com.minis.context;
 
 import java.io.Serializable;
-import java.util.EventObject;
 
 /**
  * @author 曹振远
- * @date 2023/03/15
+ * @date 2023/03/23
  **/
-public class ApplicationEvent extends EventObject implements Serializable {
+public class ContextRefreshEvent extends ApplicationEvent implements Serializable {
 
-    private static final long serialVersionUID = 8403742586879257373L;
 
-    protected String msg;
-
+    private static final long serialVersionUID = 1164860562223622218L;
 
     /**
      * Constructs a prototypical Event.
@@ -20,8 +17,11 @@ public class ApplicationEvent extends EventObject implements Serializable {
      * @param source The object on which the Event initially occurred.
      * @throws IllegalArgumentException if source is null.
      */
-    public ApplicationEvent(Object source) {
+    public ContextRefreshEvent(Object source) {
         super(source);
-        this.msg = source.toString();
+    }
+
+    public String toString(){
+        return this.msg;
     }
 }

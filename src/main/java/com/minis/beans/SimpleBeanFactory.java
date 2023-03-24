@@ -71,7 +71,6 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         return singleton;
     }
 
-    @Override
     public void registerBeanDefinition(BeanDefinition beanDefinition) {
         this.beanDefinitionMap.put(beanDefinition.getId(), beanDefinition);
     }
@@ -93,7 +92,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
      * @return
      */
     @Override
-    public Boolean containsBean(String name) {
+    public boolean containsBean(String name) {
         return containsSingleton(name);
     }
 

@@ -21,7 +21,6 @@ public class AServiceImpl implements AService {
     public AServiceImpl(String name, int level) {
         this.name = name;
         this.level = level;
-        System.out.println(this.name + "," + this.level);
     }
 
     public void sayHello() {

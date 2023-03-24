@@ -1,7 +1,7 @@
 package com.minis.beans.factory.annotation;
 
 import com.minis.beans.BeansException;
-import com.minis.beans.factory.config.AutowireCapableBeanFactory;
+import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.config.BeanPostProcessor;
 
 import java.lang.reflect.Field;
@@ -13,8 +13,16 @@ import java.lang.reflect.Field;
  **/
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
 
-    private AutowireCapableBeanFactory beanFactory;
+    private BeanFactory beanFactory;
 
+    /**
+     * 初始化之前对所有的Bean检测是否携带@Autowired注解的属性并处理
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         Object result = bean;
@@ -49,11 +57,13 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
         return null;
     }
 
-    public AutowireCapableBeanFactory getBeanFactory() {
+    public BeanFactory getBeanFactory() {
         return beanFactory;
     }
 
-    public void setBeanFactory(AutowireCapableBeanFactory factory) {
-        this.beanFactory = factory;
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
     }
+
 }

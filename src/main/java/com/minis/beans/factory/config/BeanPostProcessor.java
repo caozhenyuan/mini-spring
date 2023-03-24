@@ -1,6 +1,7 @@
 package com.minis.beans.factory.config;
 
 import com.minis.beans.BeansException;
+import com.minis.beans.factory.BeanFactory;
 
 /**
  * @author 曹振远
@@ -28,4 +29,7 @@ public interface BeanPostProcessor {
      * @throws BeansException
      */
     Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
+
+
+    void setBeanFactory(BeanFactory beanFactory);
 }

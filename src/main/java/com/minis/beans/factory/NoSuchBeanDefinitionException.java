@@ -1,4 +1,4 @@
-package com.minis.beans;
+package com.minis.beans.factory;
 
 /**
  * @author 曹振远

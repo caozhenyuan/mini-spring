@@ -28,7 +28,7 @@ public interface SingletonBeanRegistry {
      * @param beanName
      * @return
      */
-    Boolean containsSingleton(String beanName);
+    boolean containsSingleton(String beanName);
 
     /**
      * 获取所有的单例 Bean 的名称

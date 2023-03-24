@@ -3,8 +3,8 @@ package com.minis.beans.factory.support;
 import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
-import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.beans.factory.config.ConfigurableBeanFactory;
 import com.minis.beans.factory.config.ConstructorArgumentValue;
 import com.minis.beans.factory.config.ConstructorArgumentValues;
 
@@ -21,11 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2023/03/21
  * @Deprecated 抽象出来的公共方法的工厂对象
  **/
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory, BeanDefinitionRegistry {
 
-    private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+    protected Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
 
-    private List<String> beanDefinitionNames = new ArrayList<>();
+    protected List<String> beanDefinitionNames = new ArrayList<>();
 
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
@@ -46,7 +46,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         }
     }
 
-    @Override
     public Object getBean(String beanName) throws BeansException {
         //先尝试直接从容器中拿bean实例
         Object singleton = this.getSingleton(beanName);
@@ -63,14 +62,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 this.registerSingleton(beanName, singleton);
                 //预留BeanPostProcessor位置
                 //step1: postProcessorBeforeInitialization
-                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+                applyBeanPostProcessorsBeforeInitialization(singleton, beanName);
                 //step2: afterPropertiesSet
                 //step3: init-method
                 if (null != beanDefinition.getInitMethodName() && !"".equals(beanDefinition)) {
                     invokeInitMethod(beanDefinition, singleton);
                 }
                 //step4: postProcessAfterInitialization
-                applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                applyBeanPostProcessorsAfterInitialization(singleton, beanName);
             }
         }
         return singleton;
@@ -93,7 +92,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     @Override
-    public Boolean containsBean(String name) {
+    public boolean containsBean(String name) {
         return containsSingleton(name);
     }
 
@@ -266,7 +265,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         }
     }
 
-    abstract public Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException;
+    abstract public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException;
 
-    abstract public Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException;
+    abstract public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) throws BeansException;
 }
