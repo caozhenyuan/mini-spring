@@ -1,5 +1,8 @@
 # mini-spring
 
+## 原作者地址：https://github.com/YaleGuo/Minis
+## 课程地址：https://time.geekbang.org/column/intro/100536701?tab=catalog
+
 ## IOC容器
 
 **IOC容器的组成部分：**
