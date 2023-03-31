@@ -1,7 +1,6 @@
 # mini-spring
 
 ## 原作者地址：https://github.com/YaleGuo/Minis
-## 课程地址：https://time.geekbang.org/column/intro/100536701?tab=catalog
 
 ## IOC容器
 
@@ -99,3 +98,23 @@ Spring 的做法是在 BeanFactory 中引入一个结构：**earlySingletonObjec
 >
 > 1. 使用原型模式，每次获取 Bean 时都返回一个新实例，确保 Bean 在每个线程中都是独立的。 
 > 2. 在单例 Bean 内部增加锁机制，避免多个线程同时访问同一个共享资源。通常，为了提高性能，单例模式是最常用的模式，因此在实现单例模式的 Bean 时，如果可能会受到多线程并发访问的情况，我们需要额外考虑线程安全问题。如果某个 Bean 的状态不受共享资源的影响，比如一些静态变量、常量等，那么可以不必考虑线程安全问题。
+
+## Spring MVC
+
+**Spring MVC基本流程**
+
+> 前端发送请求到控制器，控制器寻找对应模型，找到模型后返回结果，渲染视图返回给前端生成页面。这是标准的前端请求数据的模型。
+
+**web.xml标签解析**
+
+| 标签              | 含义                                                         |
+| ----------------- | :----------------------------------------------------------- |
+| <servlet-class>   | 指定Servlet对应类，也是Web程序的核心代码                     |
+| <param-value>     | 初始化配置文件地址，表示所有的配置参数都由这里引入           |
+| <load-on-startup> | 当值大于等于0时，容器启动时加载该Servlet，且值越小启动优先级越高。如果为负数，则容器启动时不会加载该Servlet |
+| <url-pattern>     | 标签为“/”,表示拦截所有的URL                                  |
+| <servlet-name>    | Servlet自定义名称，且<servlet-mapping>与<servlet>标签中的<servlet-name>配置一样，表示用<servlet>标签中配置的Servlet进行URL请求拦截与映射匹配 |
+
+**MVC 的基本思路**
+
+> 屏蔽 Servlet 的概念，让程序员主要写业务逻辑代码

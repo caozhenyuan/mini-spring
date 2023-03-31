@@ -1,4 +1,4 @@
-package com.minis.test;
+package com.minis.test.service;
 
 /**
  * @author 曹振远

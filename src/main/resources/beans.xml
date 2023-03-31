@@ -2,20 +2,20 @@
 
 <beans>
 
-    <bean id="baseBaseService" class="com.minis.test.BaseBaseService">
-        <property type="com.minis.test.AServiceImpl" name="as" ref="aService"/>
+    <bean id="baseBaseService" class="com.minis.test.service.BaseBaseService">
+        <property type="com.minis.test.service.AServiceImpl" name="as" ref="aService"/>
     </bean>
 
-    <bean id="aService" class="com.minis.test.AServiceImpl">
+    <bean id="aService" class="com.minis.test.service.AServiceImpl">
         <constructor-arg type="String" name="name" value="abc"/>
         <constructor-arg type="int" name="level" value="3"/>
         <property type="String" name="property1" value="Someone says"/>
         <property type="String" name="property2" value="Hello World!"/>
 
-        <property type="com.minis.test.BaseService" name="ref1" ref="baseService"/>
+        <property type="com.minis.test.service.BaseService" name="ref1" ref="baseService"/>
     </bean>
 
-    <bean id="baseService" class="com.minis.test.BaseService">
-        <property type="com.minis.test.BaseBaseService" name="bbs" ref="baseBaseService"/>
+    <bean id="baseService" class="com.minis.test.service.BaseService">
+        <property type="com.minis.test.service.BaseBaseService" name="bbs" ref="baseBaseService"/>
     </bean>
 </beans>
