@@ -1,5 +1,8 @@
 package com.minis.web;
 
+import com.minis.beans.BeansException;
+import com.minis.beans.factory.annotation.Autowired;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -7,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -102,9 +106,37 @@ public class DispatcherServlet extends HttpServlet {
                 this.controllerClasses.put(controllerName, clz);
                 //保存类名和类实例Bean的映射
                 Object obj = clz.newInstance();
+                populateBean(obj);
                 this.controllerObjs.put(controllerName, obj);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * 处理controller中的@Autowired注解
+     *
+     * @param obj
+     */
+    private void populateBean(Object obj) {
+        Class<?> clz = obj.getClass();
+        Field[] fields = clz.getDeclaredFields();
+        if (fields.length <= 0) {
+            return;
+        }
+        for (Field field : fields) {
+            boolean isAutowired = field.isAnnotationPresent(Autowired.class);
+            if (isAutowired) {
+                String fieldName = field.getName();
+                Object bean;
+                try {
+                    bean = this.webApplicationContext.getBean(fieldName);
+                    field.setAccessible(true);
+                    field.set(obj,bean);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

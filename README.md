@@ -118,3 +118,47 @@ Spring 的做法是在 BeanFactory 中引入一个结构：**earlySingletonObjec
 **MVC 的基本思路**
 
 > 屏蔽 Servlet 的概念，让程序员主要写业务逻辑代码
+
+**Web 规范的内容**
+
+> web.xml 文件是 Java 的 Servlet 规范中规定的，它里面声明了一个 Web 应用全部的配置信息。按照规定，每个 Java Web 应用都必须包含一个 web.xml 文件，且必须放在 WEB-INF 路径下。它的顶层根是 web-app，指定命名空间和 schema 规定。通常，我们会在 web.xml 中配置 context-param、Listener、Filter 和 Servlet 等元素。
+
+~~~xml
+<display-name></display-name>  
+声明WEB应用的名字    
+<description></description>   
+ 声明WEB应用的描述信息    
+<context-param></context-param> 
+声明应用全局的初始化参数。  
+<listener></listener>
+声明监听器，它在建立、修改和删除会话或servlet环境时得到事件通知。
+<filter></filter> 
+声明一个实现javax.servlet.Filter接口的类。    
+<filter-mapping></filter-mapping>
+声明过滤器的拦截路径。 
+<servlet></servlet> 
+声明servlet类。    
+<servlet-mapping></servlet-mapping> 
+声明servlet的访问路径，试一个方便访问的URL。    
+<session-config></session-config> 
+session有关的配置，超时值。
+<error-page></error-page> 
+在返回特定HTTP状态代码时，或者特定类型的异常被抛出时，能够制定将要显示的页面。   
+~~~
+
+**Servlet 服务器如 Tomcat 启动的时候，要遵守下面的时序：**
+
+> 1. 在启动 Web 项目时，Tomcat 会读取 web.xml 中的 comtext-param 节点，获取这个 Web 应用的全局参数。
+> 2. Tomcat 创建一个 ServletContext 实例，是全局有效的。
+> 3. 将 context-param 的参数转换为键值对，存储在 ServletContext 里。
+> 4. 创建 listener 中定义的监听类的实例，按照规定 Listener 要继承自 ServletContextListener。监听器初始化方法是 contextInitialized(ServletContextEvent event)。初始化方法中可以通过 event.getServletContext().getInitParameter(“name”) 方法获得上下文环境中的键值对。
+> 5. 当 Tomcat 完成启动，也就是 contextInitialized 方法完成后，再对 Filter 过滤器进行初始化。
+> 6. servlet 初始化：有一个参数 load-on-startup，它为正数的值越小优先级越高，会自动启动，如果为负数或未指定这个参数，会在 servlet 被调用时再进行初始化。init-param 是一个 servlet 整个范围之内有效的参数，在 servlet 类的 init() 方法中通过 this.getInitParameter(″param1″) 方法获得。
+
+总结：
+
+> 当 Sevlet 服务器启动时，Listener 会优先启动，读配置文件路径，启动过程中初始化上下文，然后启动 IoC 容器，这个容器通过 refresh() 方法加载所管理的 Bean 对象。这样就实现了 Tomcat 启动的时候同时启动 IoC 容器。
+
+**什么是WAC?**
+
+> 在服务器启动的过程中，会注册Web应用上下文，也就是WAC。
