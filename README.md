@@ -162,3 +162,7 @@ session有关的配置，超时值。
 **什么是WAC?**
 
 > 在服务器启动的过程中，会注册Web应用上下文，也就是WAC。
+
+**从 Dispatcher 内可访问 WebApplicationContext 里面管理的 Bean，那通过 WebApplicationContext 可以访问 Dispatcher 内管理的 Bean 吗？**
+
+> 通过 `WebApplicationContext` 可以访问 `DispatcherServlet` 内管理的 Bean。在 `DispatcherServlet` 初始化时，会创建一个 `WebApplicationContext`，并将其注册到 `DispatcherServlet` 中。可以从 `HttpRequest` 对象中获取 `WebApplicationContext` 实例，然后可以通过 `getBean` 方法获取 `DispatcherServlet` 中的 Bean。
