@@ -3,7 +3,6 @@ package com.minis.web.servlet;
 import com.minis.beans.factory.annotation.Autowired;
 import com.minis.web.AnnotationConfigWebApplicationContext;
 import com.minis.web.WebApplicationContext;
-import com.minis.web.XmlScanComponentHelper;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -89,7 +87,7 @@ public class DispatcherServlet extends HttpServlet {
         initController();
 
         initHandlerMappings(this.webApplicationContext);
-        initHandlerAdapters(this.webApplicationContext);
+        initHandlerAdapters(this.parentApplicationContext);
     }
 
     private void initHandlerMappings(WebApplicationContext webApplicationContext) {
