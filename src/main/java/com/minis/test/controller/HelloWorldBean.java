@@ -1,6 +1,10 @@
 package com.minis.test.controller;
 
-import com.minis.web.RequestMapping;
+import com.minis.test.entity.User;
+import com.minis.web.bind.annotation.RequestMapping;
+import com.minis.web.bind.annotation.ResponseBody;
+
+import java.util.Date;
 
 /**
  * @author 曹振远
@@ -15,5 +19,13 @@ public class HelloWorldBean {
 
     public String doPost() {
         return "hello world!";
+    }
+
+    @RequestMapping("/test7")
+    @ResponseBody
+    public User doTest7(User user) {
+        user.setName(user.getName() + "---");
+        user.setBirthday(new Date());
+        return user;
     }
 }

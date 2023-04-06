@@ -1,14 +1,18 @@
 package com.minis.web.servlet;
 
+import com.minis.beans.BeansException;
 import com.minis.beans.factory.annotation.Autowired;
-import com.minis.web.AnnotationConfigWebApplicationContext;
-import com.minis.web.WebApplicationContext;
+import com.minis.web.context.WebApplicationContext;
+import com.minis.web.context.support.AnnotationConfigWebApplicationContext;
+import com.minis.web.method.HandlerMethod;
+import com.minis.web.method.annotation.RequestMappingHandlerMapping;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -24,6 +28,8 @@ public class DispatcherServlet extends HttpServlet {
 
     public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
+    public static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
+    public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
     /**
      * 用于存储需要扫描的package列表
      */
@@ -66,7 +72,8 @@ public class DispatcherServlet extends HttpServlet {
     private String sContextConfigLocation;
 
     private RequestMappingHandlerMapping handlerMapping;
-    private RequestMappingHandlerAdapter handlerAdapter;
+    private HandlerAdapter handlerAdapter;
+    private ViewResolver viewResolver;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -88,6 +95,7 @@ public class DispatcherServlet extends HttpServlet {
 
         initHandlerMappings(this.webApplicationContext);
         initHandlerAdapters(this.parentApplicationContext);
+        initViewResolvers(this.parentApplicationContext);
     }
 
     private void initHandlerMappings(WebApplicationContext webApplicationContext) {
@@ -95,7 +103,19 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private void initHandlerAdapters(WebApplicationContext webApplicationContext) {
-        this.handlerAdapter = new RequestMappingHandlerAdapter(webApplicationContext);
+        try {
+            this.handlerAdapter = (HandlerAdapter) webApplicationContext.getBean(HANDLER_ADAPTER_BEAN_NAME);
+        } catch (BeansException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void initViewResolvers(WebApplicationContext webApplicationContext) {
+        try {
+            this.viewResolver = (ViewResolver) webApplicationContext.getBean(VIEW_RESOLVER_BEAN_NAME);
+        } catch (BeansException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -150,17 +170,42 @@ public class DispatcherServlet extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) {
         request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webApplicationContext);
         try {
-            doDisPath(request, response);
+            doDispatch(request, response);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void doDisPath(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    private void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
         HandlerMethod handler = this.handlerMapping.getHandler(request);
         if (null == handler) {
             return;
         }
-        this.handlerAdapter.handle(request, response, handler);
+        ModelAndView mv = this.handlerAdapter.handle(request, response, handler);
+        render(request, response, mv);
+    }
+
+    protected void render(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) throws Exception {
+        if (null == mv) {
+            PrintWriter writer = response.getWriter();
+            writer.flush();
+            writer.close();
+            return;
+        }
+        String sTarget = mv.getViewName();
+        Map<String, Object> modelMap = mv.getModel();
+        //找到具体的View
+        View view = resolveViewName(sTarget, modelMap, request);
+        view.render(modelMap, request, response);
+    }
+
+    protected View resolveViewName(String viewName, Map<String, Object> modelMap, HttpServletRequest request) throws Exception {
+        if (null != this.viewResolver) {
+            View view = viewResolver.resolveViewName(viewName);
+            if (null != view) {
+                return view;
+            }
+        }
+        return null;
     }
 }

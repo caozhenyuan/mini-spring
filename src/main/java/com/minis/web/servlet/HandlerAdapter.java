@@ -16,5 +16,5 @@ public interface HandlerAdapter {
      * @param response
      * @param obj
      */
-    void handle(HttpServletRequest request, HttpServletResponse response, Object obj);
+    ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object obj);
 }

@@ -1,4 +1,6 @@
-package com.minis.web;
+package com.minis.web.context;
+
+import com.minis.web.context.support.XmlWebApplicationContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;

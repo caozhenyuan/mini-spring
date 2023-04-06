@@ -1,4 +1,6 @@
-package com.minis.web;
+package com.minis.web.bind.support;
+
+import com.minis.web.WebDataBinder;
 
 import javax.servlet.http.HttpServletRequest;
 
