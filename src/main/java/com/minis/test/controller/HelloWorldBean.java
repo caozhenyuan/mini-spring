@@ -13,6 +13,7 @@ import java.util.Date;
 public class HelloWorldBean {
 
     @RequestMapping("/test")
+    @ResponseBody
     public String doGet() {
         return "hello world get!";
     }

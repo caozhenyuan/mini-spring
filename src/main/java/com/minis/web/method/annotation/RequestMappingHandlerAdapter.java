@@ -12,6 +12,7 @@ import com.minis.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -71,10 +72,14 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter {
         Class<?> returnType = invocableMethod.getReturnType();
 
         ModelAndView mav = null;
-        if (invocableMethod.isAnnotationPresent(ResponseBody.class)) { //ResponseBody
+        if (invocableMethod.isAnnotationPresent(ResponseBody.class) && !(returnObj instanceof String)) { //ResponseBody
             this.messageConverter.write(returnObj, response);
+        } else if (invocableMethod.isAnnotationPresent(ResponseBody.class) && returnObj instanceof String) {
+            PrintWriter writer = response.getWriter();
+            writer.write((String) returnObj);
+            return null;
         } else if (void.class == returnType) {
-
+            return null;
         } else {
             if (returnObj instanceof ModelAndView) {
                 mav = (ModelAndView) returnObj;
