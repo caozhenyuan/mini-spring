@@ -5,6 +5,7 @@ import com.minis.jdbc.core.JdbcTemplate;
 import com.minis.test.entity.User;
 
 import java.sql.ResultSet;
+import java.util.List;
 
 /**
  * @author czy
@@ -51,5 +52,16 @@ public class UserService {
                     }
                     return rtnUser;
                 }));
+    }
+
+    public List<User> getUsers(int userId) {
+        final String sql = "select id, name,birthday from users where id> ?";
+        return jdbcTemplate.query(sql, new Object[]{userId}, (rs, rowNum) -> {
+            User rtnUser = new User();
+            rtnUser.setId(rs.getInt("id"));
+            rtnUser.setName(rs.getString("name"));
+            rtnUser.setBirthday(new java.util.Date(rs.getDate("birthday").getTime()));
+            return rtnUser;
+        });
     }
 }

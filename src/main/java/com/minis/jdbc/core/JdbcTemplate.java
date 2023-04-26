@@ -3,7 +3,9 @@ package com.minis.jdbc.core;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 
 /**
  * @author czy
@@ -57,20 +59,13 @@ public class JdbcTemplate {
         PreparedStatement stmt = null;
 
         try {
-            //初始化连接
+            //通过data source拿数据库连接
             con = dataSource.getConnection();
             stmt = con.prepareStatement(sql);
-            for (int i = 0; i < args.length; i++) {
-                Object arg = args[i];
-                //按照不同的数据类型调用JDBC的不同设置方法
-                if (arg instanceof String) {
-                    stmt.setString(i + 1, (String) arg);
-                } else if (arg instanceof Integer) {
-                    stmt.setInt(i + 1, (int) arg);
-                } else if (arg instanceof java.util.Date) {
-                    stmt.setDate(i + 1, new java.sql.Date(((java.util.Date) arg).getTime()));
-                }
-            }
+            //
+            //通过argumentSetter统一设置参数值
+            ArgumentPreparedStatementSetter argumentSetter = new ArgumentPreparedStatementSetter(args);
+            argumentSetter.setValues(stmt);
             return preparedStatementCallback.doInPreparedStatement(stmt);
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,6 +76,35 @@ public class JdbcTemplate {
                 }
                 if (null != con) {
                     con.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
+        RowMapperResultSetExtractor<T> rowMapperResultSetExtractor = new RowMapperResultSetExtractor<>(rowMapper);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            ArgumentPreparedStatementSetter statementSetter = new ArgumentPreparedStatementSetter(args);
+            statementSetter.setValues(preparedStatement);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return rowMapperResultSetExtractor.extractData(resultSet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (null != preparedStatement) {
+                    preparedStatement.close();
+                }
+                if (null != connection) {
+                    connection.close();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
