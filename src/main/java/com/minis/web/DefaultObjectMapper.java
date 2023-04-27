@@ -1,12 +1,16 @@
 package com.minis.web;
 
+import com.minis.test.entity.User;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author czy
@@ -55,6 +59,10 @@ public class DefaultObjectMapper implements ObjectMapper {
         Field[] fields = clz.getDeclaredFields();
         //对返回对象中的每一个属性进行格式转换
         for (Field field : fields) {
+            //不序列化静态字段
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
             String sField = "";
             Object value = null;
             Class<?> type = null;

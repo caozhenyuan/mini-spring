@@ -31,7 +31,18 @@ public class XmlBeanDefinitionReader {
             Element element = (Element) resource.next();
             String beanId = element.attributeValue("id");
             String beanClassName = element.attributeValue("class");
+            String initMethod = element.attributeValue("init-method");
+
             BeanDefinition beanDefinition = new BeanDefinition(beanId, beanClassName);
+            beanDefinition.setInitMethodName(initMethod);
+
+            Class<?> clz;
+            try {
+                clz = Class.forName(beanClassName);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            beanDefinition.setBeanClass(clz);
 
             //handle constructor
             List<Element> constructorElements = element.elements("constructor-arg");

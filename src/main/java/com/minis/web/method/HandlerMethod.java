@@ -16,9 +16,11 @@ public class HandlerMethod {
     private String className;
     private String methodName;
 
-    public HandlerMethod(Method method, Object obj) {
+    public HandlerMethod(Method method, Object obj, Class<?> clz, String methodName) {
         this.setMethod(method);
         this.setBean(obj);
+        this.beanType = clz;
+        this.methodName = methodName;
     }
 
     public Object getBean() {

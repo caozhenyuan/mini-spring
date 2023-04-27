@@ -15,24 +15,35 @@
     <bean id="baseService" class="com.minis.test.service.BaseService">
     </bean>
 
-    <bean id="userService" class="com.minis.test.service.UserService" />
+    <bean id="userService" class="com.minis.test.service.UserService"/>
 
-<!--    <bean id="dataSource" class="com.minis.jdbc.datasource.SingleConnectionDataSource">-->
-<!--        <property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>-->
-<!--        <property type="String" name="url" value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;serverTimezone=GMT%2B8"/>-->
-<!--        <property type="String" name="username" value="root"/>-->
-<!--        <property type="String" name="password" value="123456"/>-->
-<!--    </bean>-->
+    <!--    <bean id="dataSource" class="com.minis.jdbc.datasource.SingleConnectionDataSource">-->
+    <!--        <property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>-->
+    <!--        <property type="String" name="url" value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;serverTimezone=GMT%2B8"/>-->
+    <!--        <property type="String" name="username" value="root"/>-->
+    <!--        <property type="String" name="password" value="123456"/>-->
+    <!--    </bean>-->
     <bean id="dataSource" class="com.minis.jdbc.pool.PooledDataSource">
         <property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
-        <property type="String" name="url" value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;serverTimezone=GMT%2B8"/>
+        <property type="String" name="url"
+                  value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;serverTimezone=GMT%2B8"/>
         <property type="String" name="username" value="root"/>
         <property type="String" name="password" value="123456"/>
         <property type="int" name="initialSize" value="3"/>
+        <property type="int" name="maxActive" value="10"/>
+        <property type="long" name="maxWait" value="60000"/>
     </bean>
 
     <bean id="jdbcTemplate" class="com.minis.jdbc.core.JdbcTemplate">
-        <property type="javax.sql.DataSource" name="dataSource" ref="dataSource"/>
+        <property type="com.minis.jdbc.pool.PooledDataSource" name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="com.minis.batis.DefaultSqlSessionFactory" init-method="init">
+        <property type="String" name="mapperLocations" value="mapper"/>
+    </bean>
+
+    <bean id="userService" class="com.minis.test.service.UserService">
+
     </bean>
 
 

@@ -56,7 +56,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             if (null == singleton) {
                 BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
                 if (null == beanDefinition) {
-                    throw new BeansException("No bean.");
+                    // todo 因为父子容器的缘故，controller @Autowired service的时候不在一个容器里,
+                    //  所以后置处理器@autowired的时候找不到service ,
+                    //  这个处理放到了DispatcherServlet的populateBean方法来处理
+                    return null;
                 }
                 singleton = createBean(beanDefinition);
                 this.registerSingleton(beanName, singleton);
@@ -82,7 +85,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * @param singleton      Bean实例
      */
     private void invokeInitMethod(BeanDefinition beanDefinition, Object singleton) {
-        Class<? extends BeanDefinition> clz = beanDefinition.getClass();
+        Class<?> clz = beanDefinition.getBeanClass();
         try {
             Method method = clz.getMethod(beanDefinition.getInitMethodName());
             method.invoke(singleton);
@@ -252,7 +255,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                             } else if ("int".equals(pType) || "java.lang.int".equals(pType)) {
                                 paramTypes[0] = int.class;
                                 paramValues[0] = Integer.valueOf((String) pValue);
-                            } else {
+                            } else if("long".equals(pType) || "java.lang.Long".equals(pType)){
+                                paramTypes[0] = long.class;
+                                paramValues[0] = Long.valueOf((String) pValue);
+                            }else {
                                 paramTypes[0] = String.class;
                                 paramValues[0] = pValue;
                             }

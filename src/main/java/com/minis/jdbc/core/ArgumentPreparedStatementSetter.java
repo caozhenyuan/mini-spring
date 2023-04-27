@@ -35,17 +35,17 @@ public class ArgumentPreparedStatementSetter {
      * 对某个参数，设置对应的参数值
      *
      * @param preparedStatement preparedStatement
-     * @param i  参数下标
-     * @param arg 参数
+     * @param i                 参数下标
+     * @param arg               参数
      */
     protected void doSetValue(PreparedStatement preparedStatement, int i, Object arg) throws SQLException {
         //判断参数类型，调用响应的JDBC set方法
         if (arg instanceof String) {
-            preparedStatement.setString(i + 1, (String) arg);
+            preparedStatement.setString(i, (String) arg);
         } else if (arg instanceof Integer) {
-            preparedStatement.setInt(i + 1, (int) arg);
+            preparedStatement.setInt(i, (int) arg);
         } else if (arg instanceof java.util.Date) {
-            preparedStatement.setDate(i + 1, new java.sql.Date(((java.util.Date) arg).getTime()));
+            preparedStatement.setDate(i, new java.sql.Date(((java.util.Date) arg).getTime()));
         }
     }
 }

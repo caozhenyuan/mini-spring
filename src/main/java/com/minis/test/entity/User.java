@@ -1,5 +1,6 @@
 package com.minis.test.entity;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class User {
@@ -31,4 +32,13 @@ public class User {
         this.birthday = birthday;
     }
 
+    @Override
+    public String toString() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", birthday=" + simpleDateFormat.format(birthday) +
+                '}';
+    }
 }

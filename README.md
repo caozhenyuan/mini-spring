@@ -167,6 +167,6 @@ session有关的配置，超时值。
 
 > 通过 `WebApplicationContext` 可以访问 `DispatcherServlet` 内管理的 Bean。在 `DispatcherServlet` 初始化时，会创建一个 `WebApplicationContext`，并将其注册到 `DispatcherServlet` 中。可以从 `HttpRequest` 对象中获取 `WebApplicationContext` 实例，然后可以通过 `getBean` 方法获取 `DispatcherServlet` 中的 Bean。
 
-**请求参数怎么和 Java 对象里的属性进行自动映射？**
 
-> 
+
+## JDBC

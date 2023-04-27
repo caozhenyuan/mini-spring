@@ -156,7 +156,7 @@ public class DispatcherServlet extends HttpServlet {
                 String fieldName = field.getName();
                 Object bean;
                 try {
-                    bean = this.webApplicationContext.getBean(fieldName);
+                    bean = this.parentApplicationContext.getBean(fieldName);
                     field.setAccessible(true);
                     field.set(obj, bean);
                 } catch (Exception e) {

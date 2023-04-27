@@ -9,10 +9,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -21,7 +20,15 @@ import java.util.logging.Logger;
  **/
 public class PooledDataSource implements DataSource {
 
-    private List<PooledConnection> connections = null;
+    /**
+     * 忙的连接
+     */
+    private ArrayBlockingQueue<PooledConnection> busy;
+
+    /**
+     * 空闲的连接
+     */
+    private ArrayBlockingQueue<PooledConnection> idle;
 
     private String driverClassName;
 
@@ -33,23 +40,29 @@ public class PooledDataSource implements DataSource {
 
     private int initialSize = 2;
 
+    private AtomicInteger size;
+
+    private int maxActive;
+    private long maxWait;
+
     private Properties connectionProperties;
 
 
     public PooledDataSource() {
+
     }
 
     /**
      * 初始化连接
      */
     private void initPool() {
-        this.connections = new ArrayList<>(initialSize);
         System.out.println("********connection pool init*********");
         try {
-            for (int i = 0; i < initialSize; i++) {
+            for (int i = 0; i < size.get(); i++) {
                 Connection connection = DriverManager.getConnection(url, username, password);
                 PooledConnection pooledConnection = new PooledConnection(connection, false);
-                this.connections.add(pooledConnection);
+                //初始化连接的时候放入空闲连接
+                this.idle.add(pooledConnection);
                 System.out.println("********add connection pool*********");
             }
             System.out.println("********connection pool end*********");
@@ -59,13 +72,21 @@ public class PooledDataSource implements DataSource {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        return getConnectionFromDriver(getUsername(), getPassword());
+    public synchronized Connection getConnection() throws SQLException {
+        try {
+            return getConnectionFromDriver(getUsername(), getPassword());
+        } catch (PoolExhaustedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return getConnectionFromDriver(username, password);
+        try {
+            return getConnectionFromDriver(username, password);
+        } catch (PoolExhaustedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -75,7 +96,7 @@ public class PooledDataSource implements DataSource {
      * @param password 密码
      * @return 连接对象
      */
-    private Connection getConnectionFromDriver(String username, String password) {
+    private Connection getConnectionFromDriver(String username, String password) throws SQLException, PoolExhaustedException {
         Properties mergedProps = new Properties();
         Properties connProps = getConnectionProperties();
         if (null != connProps) {
@@ -87,20 +108,12 @@ public class PooledDataSource implements DataSource {
         if (!StringUtils.isEmpty(password)) {
             mergedProps.put("password", password);
         }
-        if (CollectionUtils.isEmpty(this.connections)) {
+        //如果空闲连接和忙的连接都为空则说明没有初始化，则初始化连接池链接
+        if (CollectionUtils.isEmpty(this.idle) && CollectionUtils.isEmpty(this.busy)) {
             initPool();
         }
-        PooledConnection pooledConnection = getAvailableConnection();
-
-        while (null == pooledConnection) {
-            pooledConnection = getAvailableConnection();
-            try {
-                TimeUnit.MILLISECONDS.sleep(30);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return pooledConnection;
+        //获取连接
+        return getAvailableConnection();
     }
 
     /**
@@ -108,22 +121,54 @@ public class PooledDataSource implements DataSource {
      *
      * @return 有效连接对象
      */
-    private PooledConnection getAvailableConnection() {
-        for (PooledConnection pooledConnection : this.connections) {
-            if (!pooledConnection.isActive()) {
-                pooledConnection.setActive(true);
-                return pooledConnection;
+    private PooledConnection getAvailableConnection() throws PoolExhaustedException, SQLException {
+        long now = System.currentTimeMillis();
+        // 尝试从空闲连接池中获取连接
+        PooledConnection conn = idle.poll();
+        while (null == conn) {
+            // 如果没有可用连接，则尝试创建一个新连接
+            if (size.get() < maxActive) {
+                if (size.addAndGet(1) > maxActive) {
+                    size.decrementAndGet();
+                } else {
+                    conn = createConnection();
+                }
+            }
+            // 等待直到有可用连接或超时
+            if ((System.currentTimeMillis() - now) >= maxWait) {
+                throw new PoolExhaustedException("Timeout: Unable to fetch a connection in " + (maxWait / 1000) + " seconds.");
+            } else {
+                try {
+                    wait(maxWait);
+                } catch (InterruptedException e) {
+                    throw new SQLException(e);
+                }
+                conn = idle.poll();
             }
         }
-        return null;
+        // 将连接添加到忙碌连接池中
+        conn.setActive(true);
+        busy.add(conn);
+        return conn;
     }
 
-    public List<PooledConnection> getConnections() {
-        return connections;
+    private PooledConnection createConnection() throws SQLException {
+        Connection connection = DriverManager.getConnection(url, username, password);
+        PooledConnection pooledConnection = new PooledConnection(connection, false);
+        idle.add(pooledConnection);
+        notifyAll();
+        return pooledConnection;
     }
 
-    public void setConnections(List<PooledConnection> connections) {
-        this.connections = connections;
+    /**
+     * 数据库连接回收
+     *
+     * @param conn
+     */
+    public synchronized void releaseConnection(PooledConnection conn) {
+        busy.remove(conn);
+        idle.add(conn);
+        notifyAll();
     }
 
     public String getDriverClassName() {
@@ -169,6 +214,7 @@ public class PooledDataSource implements DataSource {
 
     public void setInitialSize(int initialSize) {
         this.initialSize = initialSize;
+        this.size = new AtomicInteger(initialSize);
     }
 
     public Properties getConnectionProperties() {
@@ -177,6 +223,24 @@ public class PooledDataSource implements DataSource {
 
     public void setConnectionProperties(Properties connectionProperties) {
         this.connectionProperties = connectionProperties;
+    }
+
+    public int getMaxActive() {
+        return maxActive;
+    }
+
+    public void setMaxActive(int maxActive) {
+        this.maxActive = maxActive;
+    }
+
+    public long getMaxWait() {
+        return maxWait;
+    }
+
+    public void setMaxWait(long maxWait) {
+        this.maxWait = maxWait;
+        busy = new ArrayBlockingQueue<>(maxActive);
+        idle = new ArrayBlockingQueue<>(maxActive);
     }
 
     @Override

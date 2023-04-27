@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="com.minis.test.entity.User">
+    <select id="getUserInfo" parameterType="java.lang.Integer" resultType="com.test.entity.User">
+        select id, name,birthday
+        from user
+        where id=?
+    </select>
+
+    <update id="updateUserBirthdayById" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        update user set birthday = CURRENT_TIMESTAMP where id = ?
+    </update>
+</mapper>

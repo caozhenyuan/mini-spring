@@ -55,9 +55,12 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter {
         for (Parameter methodParameter : methodParams) {
             Class<?> type = methodParameter.getType();
             if (HttpServletRequest.class != type && HttpServletResponse.class != type) {
+                //todo 这里如果传入的参数是基本数据类型则会报错 例：http://localhost:7001/getUserById?userId=1
+                //todo 应该是缺少@RequestParam的扩展
                 Object methodParamObj = methodParameter.getType().newInstance();
                 //给这个参数创建WebDataBinder
                 WebDataBinder wdb = binderFactory.createBinder(request, methodParamObj, methodParameter.getName());
+                webBindingInitializer.initBinder(wdb);
                 wdb.bind(request);
                 methodParamObjs[i] = methodParamObj;
             } else if (HttpServletRequest.class == type) {
@@ -72,12 +75,15 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter {
         Class<?> returnType = invocableMethod.getReturnType();
 
         ModelAndView mav = null;
-        if (invocableMethod.isAnnotationPresent(ResponseBody.class) && !(returnObj instanceof String)) { //ResponseBody
-            this.messageConverter.write(returnObj, response);
-        } else if (invocableMethod.isAnnotationPresent(ResponseBody.class) && returnObj instanceof String) {
-            PrintWriter writer = response.getWriter();
-            writer.write((String) returnObj);
-            return null;
+        //todo 自行扩展
+        if (invocableMethod.isAnnotationPresent(ResponseBody.class)) {
+            if (returnObj instanceof String) {
+                PrintWriter writer = response.getWriter();
+                writer.write((String) returnObj);
+                return null;
+            } else {
+                this.messageConverter.write(returnObj, response);
+            }
         } else if (void.class == returnType) {
             return null;
         } else {
