@@ -72,4 +72,12 @@
         <property type="String" name="suffix" value=".jsp"/>
     </bean>
 
+
+    <bean id="realAction" class="com.minis.test.service.Action1">
+
+    </bean>
+    <bean id="action" class="com.minis.aop.ProxyFactoryBean">
+        <property type="java.lang.Object" name="target" ref="realAction"/>
+    </bean>
+
 </beans>

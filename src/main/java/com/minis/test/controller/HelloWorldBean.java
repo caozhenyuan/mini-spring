@@ -1,9 +1,14 @@
 package com.minis.test.controller;
 
+import com.minis.beans.factory.annotation.Autowired;
 import com.minis.test.entity.User;
+import com.minis.test.service.IAction;
 import com.minis.web.bind.annotation.RequestMapping;
 import com.minis.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -11,6 +16,21 @@ import java.util.Date;
  * @date 2023/03/27
  **/
 public class HelloWorldBean {
+
+    @Autowired
+    private IAction action;
+
+    @RequestMapping("/testAop")
+    public void doTestAop(HttpServletRequest request, HttpServletResponse response) {
+        action.doAction();
+        String str = "test aop, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @RequestMapping("/test")
     @ResponseBody

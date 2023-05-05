@@ -3,6 +3,7 @@ package com.minis.beans.factory.support;
 import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.ConfigurableBeanFactory;
 import com.minis.beans.factory.config.ConstructorArgumentValue;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2023/03/21
  * @Deprecated 抽象出来的公共方法的工厂对象
  **/
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory, BeanDefinitionRegistry {
+public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory, BeanDefinitionRegistry {
 
     protected Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
 
@@ -54,6 +55,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             singleton = this.earlySingletonObjects.get(beanName);
             //如果连毛坯都没有，则尝试创建bean实例并注册
             if (null == singleton) {
+                System.out.println("get bean null---------------" + beanName);
                 BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
                 if (null == beanDefinition) {
                     // todo 因为父子容器的缘故，controller @Autowired service的时候不在一个容器里,
@@ -75,6 +77,12 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 applyBeanPostProcessorsAfterInitialization(singleton, beanName);
             }
         }
+        //处理FactoryBean
+        if (singleton instanceof FactoryBean) {
+            System.out.println("factory bean -------------- " + beanName + "----------------" + singleton);
+            return this.getObjectForBeanInstance(singleton,beanName);
+        }
+
         return singleton;
     }
 
@@ -255,10 +263,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                             } else if ("int".equals(pType) || "java.lang.int".equals(pType)) {
                                 paramTypes[0] = int.class;
                                 paramValues[0] = Integer.valueOf((String) pValue);
-                            } else if("long".equals(pType) || "java.lang.Long".equals(pType)){
+                            } else if ("long".equals(pType) || "java.lang.Long".equals(pType)) {
                                 paramTypes[0] = long.class;
                                 paramValues[0] = Long.valueOf((String) pValue);
-                            }else {
+                            } else {
                                 paramTypes[0] = String.class;
                                 paramValues[0] = pValue;
                             }
