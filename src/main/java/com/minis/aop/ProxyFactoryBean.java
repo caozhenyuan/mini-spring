@@ -1,5 +1,8 @@
 package com.minis.aop;
 
+import com.minis.beans.BeansException;
+import com.minis.beans.factory.BeanFactory;
+import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.FactoryBean;
 import com.minis.util.ClassUtils;
 
@@ -7,11 +10,11 @@ import com.minis.util.ClassUtils;
  * @author czy
  * @date 2023/05/05
  **/
-public class ProxyFactoryBean implements FactoryBean<Object> {
+public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
+
+    private BeanFactory beanFactory;
 
     private AopProxyFactory aopProxyFactory;
-
-    private String[] interceptorNames;
 
     private String targetName;
 
@@ -21,9 +24,14 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
 
     private Object singletonInstance;
 
+    private String interceptorName;
+
+    private Advisor advisor;
+
     public ProxyFactoryBean() {
         this.aopProxyFactory = new DefaultAopProxyFactory();
     }
+
 
     /**
      * 获取内部对象
@@ -33,6 +41,7 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
      */
     @Override
     public Object getObejct() throws Exception {
+        initializeAdvisor();
         return getSingletonInstance();
     }
 
@@ -42,20 +51,20 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
     }
 
 
+    public void setInterceptorName(String interceptorName) {
+        this.interceptorName = interceptorName;
+    }
+
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+    }
+
     public AopProxyFactory getAopProxyFactory() {
         return aopProxyFactory;
     }
 
     public void setAopProxyFactory(AopProxyFactory aopProxyFactory) {
         this.aopProxyFactory = aopProxyFactory;
-    }
-
-    public String[] getInterceptorNames() {
-        return interceptorNames;
-    }
-
-    public void setInterceptorNames(String[] interceptorNames) {
-        this.interceptorNames = interceptorNames;
     }
 
     public String getTargetName() {
@@ -107,10 +116,33 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
 
     protected AopProxy createAopProxy() {
         System.out.println("----------createAopProxy for :" + target + "--------");
-        return getAopProxyFactory().createAopProxy(target);
+        return getAopProxyFactory().createAopProxy(target, this.advisor);
     }
 
     public void setSingletonInstance(Object singletonInstance) {
         this.singletonInstance = singletonInstance;
+    }
+
+
+    /**
+     * 将应用程序自定义的拦截器获取到 Advisor 里
+     */
+    private synchronized void initializeAdvisor() {
+        Object advice = null;
+        MethodInterceptor mi = null;
+        try {
+            advice = this.beanFactory.getBean(this.interceptorName);
+        } catch (BeansException e) {
+            e.printStackTrace();
+        }
+        if (advice instanceof BeforeAdvice) {
+            mi = new MethodBeforeAdviceInterceptor((MethodBeforeAdvice) advice);
+        } else if (advice instanceof AfterAdvice) {
+            mi = new AfterReturningAdviceInterceptor((AfterReturningAdvice) advice);
+        } else if (advice instanceof MethodInterceptor) {
+            mi = (MethodInterceptor) advice;
+        }
+        advisor = new DefaultAdvisor();
+        advisor.setMethodInterceptor(mi);
     }
 }

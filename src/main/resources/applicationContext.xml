@@ -72,12 +72,16 @@
         <property type="String" name="suffix" value=".jsp"/>
     </bean>
 
+    <!--aop-->
+    <bean id="myInterceptor" class="com.minis.test.service.TracingInterceptor"/>
+    <bean id="myBeforeAdvice" class="com.minis.test.service.MyBeforeAdvice" />
+    <bean id="myAfterAdvice" class="com.minis.test.service.MyAfterAdvice" />
 
     <bean id="realAction" class="com.minis.test.service.Action1">
-
     </bean>
     <bean id="action" class="com.minis.aop.ProxyFactoryBean">
         <property type="java.lang.Object" name="target" ref="realAction"/>
+        <property type="String" name="interceptorName" value="myAfterAdvice"/>
     </bean>
 
 </beans>

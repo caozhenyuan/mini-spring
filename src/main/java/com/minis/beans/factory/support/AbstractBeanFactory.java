@@ -3,6 +3,7 @@ package com.minis.beans.factory.support;
 import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.ConfigurableBeanFactory;
@@ -65,6 +66,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 }
                 singleton = createBean(beanDefinition);
                 this.registerSingleton(beanName, singleton);
+
+                //ProxyFactoryBean实现了BeanFactoryAware接口，注入的时候把beanFactory set进去
+                if (singleton instanceof BeanFactoryAware) {
+                    ((BeanFactoryAware) singleton).setBeanFactory(this);
+                }
                 //预留BeanPostProcessor位置
                 //step1: postProcessorBeforeInitialization
                 applyBeanPostProcessorsBeforeInitialization(singleton, beanName);
@@ -80,7 +86,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         //处理FactoryBean
         if (singleton instanceof FactoryBean) {
             System.out.println("factory bean -------------- " + beanName + "----------------" + singleton);
-            return this.getObjectForBeanInstance(singleton,beanName);
+            return this.getObjectForBeanInstance(singleton, beanName);
         }
 
         return singleton;
