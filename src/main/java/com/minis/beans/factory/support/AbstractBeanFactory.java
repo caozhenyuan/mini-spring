@@ -73,7 +73,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 }
                 //预留BeanPostProcessor位置
                 //step1: postProcessorBeforeInitialization
-                applyBeanPostProcessorsBeforeInitialization(singleton, beanName);
+                singleton = applyBeanPostProcessorsBeforeInitialization(singleton, beanName);
+                System.out.println(" class proxy after bean post processor " + singleton.getClass());
                 //step2: afterPropertiesSet
                 //step3: init-method
                 if (null != beanDefinition.getInitMethodName() && !"".equals(beanDefinition)) {
@@ -81,6 +82,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 }
                 //step4: postProcessAfterInitialization
                 applyBeanPostProcessorsAfterInitialization(singleton, beanName);
+
+                this.removeSingleton(beanName);
+                this.registerBean(beanName, singleton);
             }
         }
         //处理FactoryBean

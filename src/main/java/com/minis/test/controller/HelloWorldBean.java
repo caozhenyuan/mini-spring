@@ -20,17 +20,54 @@ public class HelloWorldBean {
     @Autowired
     private IAction action;
 
+    @Autowired
+    private IAction action2;
+
     @RequestMapping("/testAop")
     public void doTestAop(HttpServletRequest request, HttpServletResponse response) {
         action.doAction();
         String str = "test aop, hello world!";
         try {
             response.getWriter().write(str);
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    @RequestMapping("/testAop2")
+    public void doTestAop2(HttpServletRequest request, HttpServletResponse response) {
+        action.doSomething();
+        String str = "test aop 2, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @RequestMapping("/testAop3")
+    public void doTestAop3(HttpServletRequest request, HttpServletResponse response) {
+        action2.doAction();
+        String str = "test aop 3, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/testAop4")
+    public void doTestAop4(HttpServletRequest request, HttpServletResponse response) {
+        action2.doSomething();
+        String str = "test aop 4, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @RequestMapping("/test")
     @ResponseBody
